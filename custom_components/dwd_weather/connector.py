@@ -1040,7 +1040,7 @@ class DWDWeatherData:
             )
 
         if self._config[CONF_SENSOR_FORECAST_STEPS]:
-            return result[: self._config[CONF_SENSOR_FORECAST_STEPS]]
+            return result[: int(self._config[CONF_SENSOR_FORECAST_STEPS])]
         return result
 
     def _resolve_airquality_source(
@@ -1088,9 +1088,8 @@ class DWDWeatherData:
         )
         result = []
         for index, item in enumerate(data):
-            if (
+            if self._config[CONF_SENSOR_FORECAST_STEPS] and index >= int(
                 self._config[CONF_SENSOR_FORECAST_STEPS]
-                and index >= self._config[CONF_SENSOR_FORECAST_STEPS]
             ):
                 break
             result.append(
@@ -1212,9 +1211,8 @@ class DWDWeatherData:
         if forecast_data:
             item_counter = 0
             for key in forecast_data:
-                if (
+                if self._config[CONF_SENSOR_FORECAST_STEPS] and item_counter >= int(
                     self._config[CONF_SENSOR_FORECAST_STEPS]
-                    and item_counter >= self._config[CONF_SENSOR_FORECAST_STEPS]
                 ):
                     break
                 if self._get_forecast_timestamp(key) < timestamp:

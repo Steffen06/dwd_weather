@@ -345,3 +345,108 @@ def test_radar_getters_do_not_trigger_refresh_calls(mock_dwd_data):
 
     mock_dwd_data.dwd_weather.get_radar_precipitation_forecast.assert_not_called()
     mock_dwd_data.dwd_weather.get_radar_next_precipitation.assert_not_called()
+
+
+def test_get_radar_precipitation_hourly_respects_forecast_steps(mock_dwd_data):
+    """get_radar_precipitation_hourly should limit results to CONF_SENSOR_FORECAST_STEPS."""
+    # Setup radar precipitation forecast with 5 data points
+    mock_dwd_data._radar_precipitation_forecast = {
+        datetime(2026, 1, 1, 0, 0, tzinfo=timezone.utc): 0.0,
+        datetime(2026, 1, 1, 0, 5, tzinfo=timezone.utc): 1.2,
+        datetime(2026, 1, 1, 0, 10, tzinfo=timezone.utc): 2.4,
+        datetime(2026, 1, 1, 0, 15, tzinfo=timezone.utc): 1.8,
+        datetime(2026, 1, 1, 0, 20, tzinfo=timezone.utc): 0.6,
+    }
+
+    # Test with CONF_SENSOR_FORECAST_STEPS = 5 (should return all)
+    result = mock_dwd_data.get_radar_precipitation_hourly()
+    assert len(result) == 5
+
+    # Test with CONF_SENSOR_FORECAST_STEPS = 2 (should return only first 2)
+    mock_dwd_data._config["sensor_forecast_steps"] = 2
+    result = mock_dwd_data.get_radar_precipitation_hourly()
+    assert len(result) == 2
+    assert result[0]["value"] == 0.0
+    assert result[1]["value"] == 1.2
+
+    # Test with CONF_SENSOR_FORECAST_STEPS = 0 (should return all)
+    mock_dwd_data._config["sensor_forecast_steps"] = 0
+    result = mock_dwd_data.get_radar_precipitation_hourly()
+    assert len(result) == 5
+
+
+def test_get_airquality_hourly_respects_forecast_steps(mock_dwd_data):
+    """get_airquality_hourly should limit results based on CONF_SENSOR_FORECAST_STEPS."""
+    from homeassistant.components.weather import WeatherEntityFeature
+
+    # Create mock airquality data with 5 items
+    mock_airquality_data = [
+        {"PM2_5": 10.0, "PM10": 20.0},
+        {"PM2_5": 11.0, "PM10": 21.0},
+        {"PM2_5": 12.0, "PM10": 22.0},
+        {"PM2_5": 13.0, "PM10": 23.0},
+        {"PM2_5": 14.0, "PM10": 24.0},
+    ]
+
+    # Mock the airquality data source
+    mock_dwd_data._airquality_hourly = MagicMock()
+    mock_dwd_data._airquality_hourly.data = mock_airquality_data
+    mock_dwd_data._config["download_airquality"] = True
+
+    # Test with CONF_SENSOR_FORECAST_STEPS = 5 (should return all)
+    result = mock_dwd_data.get_airquality_hourly()
+    assert len(result) == 5
+
+    # Test with CONF_SENSOR_FORECAST_STEPS = 2 (should return only first 2)
+    mock_dwd_data._config["sensor_forecast_steps"] = 2
+    result = mock_dwd_data.get_airquality_hourly()
+    assert len(result) == 2
+    assert result[0]["value"]["PM2_5"] == 10.0
+    assert result[1]["value"]["PM2_5"] == 11.0
+
+    # Test with CONF_SENSOR_FORECAST_STEPS = 0 (should return all)
+    mock_dwd_data._config["sensor_forecast_steps"] = 0
+    result = mock_dwd_data.get_airquality_hourly()
+    assert len(result) == 5
+
+
+def test_get_radar_precipitation_hourly_with_integer_forecast_steps(mock_dwd_data):
+    """get_radar_precipitation_hourly should convert forecast_steps to int for slicing."""
+    mock_dwd_data._radar_precipitation_forecast = {
+        datetime(2026, 1, 1, 0, 0, tzinfo=timezone.utc): 0.1,
+        datetime(2026, 1, 1, 0, 5, tzinfo=timezone.utc): 0.2,
+        datetime(2026, 1, 1, 0, 10, tzinfo=timezone.utc): 0.3,
+    }
+
+    # Simulate the config value being a string (from config flow)
+    # This should not cause a TypeError
+    mock_dwd_data._config["sensor_forecast_steps"] = "2"
+    result = mock_dwd_data.get_radar_precipitation_hourly()
+    assert len(result) == 2
+    assert result[0]["value"] == 0.1
+    assert result[1]["value"] == 0.2
+
+
+def test_get_airquality_hourly_with_integer_forecast_steps(mock_dwd_data):
+    """get_airquality_hourly should convert forecast_steps to int for comparisons."""
+    from homeassistant.components.weather import WeatherEntityFeature
+
+    # Create mock airquality data with 3 items
+    mock_airquality_data = [
+        {"PM2_5": 10.0, "PM10": 20.0},
+        {"PM2_5": 11.0, "PM10": 21.0},
+        {"PM2_5": 12.0, "PM10": 22.0},
+    ]
+
+    # Mock the airquality data source
+    mock_dwd_data._airquality_hourly = MagicMock()
+    mock_dwd_data._airquality_hourly.data = mock_airquality_data
+    mock_dwd_data._config["download_airquality"] = True
+
+    # Simulate the config value being a string (from config flow)
+    # This should not cause a TypeError
+    mock_dwd_data._config["sensor_forecast_steps"] = "2"
+    result = mock_dwd_data.get_airquality_hourly()
+    assert len(result) == 2
+    assert result[0]["value"]["PM2_5"] == 10.0
+    assert result[1]["value"]["PM2_5"] == 11.0
