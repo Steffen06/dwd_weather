@@ -4,6 +4,23 @@ import logging
 from custom_components.dwd_weather.connector import DWDWeatherData
 from custom_components.dwd_weather.entity import DWDWeatherEntity
 from homeassistant.components.sensor.const import SensorStateClass
+from homeassistant.components.weather import (
+    ATTR_CONDITION_CLEAR_NIGHT,
+    ATTR_CONDITION_CLOUDY,
+    ATTR_CONDITION_EXCEPTIONAL,
+    ATTR_CONDITION_FOG,
+    ATTR_CONDITION_HAIL,
+    ATTR_CONDITION_LIGHTNING,
+    ATTR_CONDITION_LIGHTNING_RAINY,
+    ATTR_CONDITION_PARTLYCLOUDY,
+    ATTR_CONDITION_POURING,
+    ATTR_CONDITION_RAINY,
+    ATTR_CONDITION_SNOWY,
+    ATTR_CONDITION_SNOWY_RAINY,
+    ATTR_CONDITION_SUNNY,
+    ATTR_CONDITION_WINDY,
+    ATTR_CONDITION_WINDY_VARIANT,
+)
 
 from homeassistant.const import (
     ATTR_ATTRIBUTION,
@@ -57,16 +74,34 @@ ATTR_SENSOR_ID = "sensor_id"
 ATTR_SITE_ID = "site_id"
 ATTR_SITE_NAME = "site_name"
 
+WEATHER_CONDITION_OPTIONS = [
+    ATTR_CONDITION_CLEAR_NIGHT,
+    ATTR_CONDITION_CLOUDY,
+    ATTR_CONDITION_EXCEPTIONAL,
+    ATTR_CONDITION_FOG,
+    ATTR_CONDITION_HAIL,
+    ATTR_CONDITION_LIGHTNING,
+    ATTR_CONDITION_LIGHTNING_RAINY,
+    ATTR_CONDITION_PARTLYCLOUDY,
+    ATTR_CONDITION_POURING,
+    ATTR_CONDITION_RAINY,
+    ATTR_CONDITION_SNOWY,
+    ATTR_CONDITION_SNOWY_RAINY,
+    ATTR_CONDITION_SUNNY,
+    ATTR_CONDITION_WINDY,
+    ATTR_CONDITION_WINDY_VARIANT,
+]
+
 # Sensor types are defined as:
 #   variable -> [0]title, [1]device_class, [2]units, [3]icon, [4]enabled_by_default, [5]state_class, [6]enabled_in_hourly_update
 SENSOR_TYPES = {
     "weather_condition": [
         "Weather",
-        None,
+        SensorDeviceClass.ENUM,
         None,
         "mdi:weather-partly-cloudy",
         False,
-        SensorStateClass.MEASUREMENT,
+        None,
         True,
     ],
     "weather_report": [
@@ -497,6 +532,13 @@ class DWDWeatherForecastSensor(DWDWeatherEntity, SensorEntity):
     def state_class(self):
         """Return the state class of the sensor."""
         return SENSOR_TYPES[self._type][5]
+
+    @property
+    def options(self):
+        """Return valid options for enum sensors."""
+        if self._type == "weather_condition":
+            return WEATHER_CONDITION_OPTIONS
+        return None
 
     @property
     def extra_state_attributes(self):

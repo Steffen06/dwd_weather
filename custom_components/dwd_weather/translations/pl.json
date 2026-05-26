@@ -5,20 +5,20 @@
       "weather_condition": {
         "name": "Warunki pogodowe",
         "state": {
-          "clear-night": "[%key:component::weather::entity_component::_::state::clear-night%]",
-          "cloudy": "[%key:component::weather::entity_component::_::state::cloudy%]",
-          "fog": "[%key:component::weather::entity_component::_::state::fog%]",
-          "hail": "[%key:component::weather::entity_component::_::state::hail%]",
-          "lightning": "[%key:component::weather::entity_component::_::state::lightning%]",
-          "lightning-rainy": "[%key:component::weather::entity_component::_::state::lightning-rainy%]",
-          "partlycloudy": "[%key:component::weather::entity_component::_::state::partlycloudy%]",
-          "pouring": "[%key:component::weather::entity_component::_::state::pouring%]",
-          "rainy": "[%key:component::weather::entity_component::_::state::rainy%]",
-          "snowy": "[%key:component::weather::entity_component::_::state::snowy%]",
-          "snowy-rainy": "[%key:component::weather::entity_component::_::state::snowy-rainy%]",
-          "sunny": "[%key:component::weather::entity_component::_::state::sunny%]",
-          "windy": "[%key:component::weather::entity_component::_::state::windy%]",
-          "windy-variant": "[%key:component::weather::entity_component::_::state::windy-variant%]"
+          "clear-night": "Czysta noc",
+          "cloudy": "Pochmurnie",
+          "fog": "Mgła",
+          "hail": "Grad",
+          "lightning": "Błyskawica",
+          "lightning-rainy": "Błyskawica i deszcz",
+          "partlycloudy": "Częściowo pochmurnie",
+          "pouring": "Ulewny deszcz",
+          "rainy": "Deszczowo",
+          "snowy": "Śnieżnie",
+          "snowy-rainy": "Śnieg i deszcz",
+          "sunny": "Słonecznie",
+          "windy": "Wietrznie",
+          "windy-variant": "Wietrznie variant"
         }
       },
       "weather_report": {
